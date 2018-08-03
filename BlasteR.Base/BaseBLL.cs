@@ -1,6 +1,6 @@
 ﻿/*
     This library is intended as a starting point for creating Business Logic Layer in database oriented applications.
-    Copyright (C) 2017 Srdjan Rudic
+    Copyright (C) 2018 Srdjan Rudic
     Email: blaster7th@gmail.com
 
     This library is free software: you can redistribute it and/or modify
