@@ -9,7 +9,7 @@ namespace BlasteR.Base
     {
         [Key]
         [DataMember]
-        public int ID { get; set; }
+        public int Id { get; set; }
         [DataMember]
         public DateTime CreationTime { get; set; }
         [DataMember]
@@ -17,7 +17,7 @@ namespace BlasteR.Base
         
         public BaseEntity()
         {
-            ID = 0;
+            Id = 0;
             CreationTime = DateTime.Now;
             LastEditTime = null;
         }

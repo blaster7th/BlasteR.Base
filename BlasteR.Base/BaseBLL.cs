@@ -71,9 +71,9 @@ namespace BlasteR.Base
         /// <summary>
         /// Gets single entity of type T, or default (null) if entity with that value does not exist.
         /// </summary>
-        /// <param name="id">ID of the record.</param>
+        /// <param name="id">Id of the record.</param>
         /// <returns>Single or default value of type T.</returns>
-        public virtual T GetByID(int id)
+        public virtual T GetById(int id)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
@@ -116,15 +116,15 @@ namespace BlasteR.Base
         }
 
         /// <summary>
-        /// Returns elements of type T which is contained in entityIDs enumerable.
+        /// Returns elements of type T which is contained in entityIds enumerable.
         /// </summary>
-        /// <param name="entityIDs">Enumerable of entityIDs which should be returned.</param>
+        /// <param name="entityIds">Enumerable of entityIds which should be returned.</param>
         /// <returns>IList of requested entities.</returns>
-        public IList<T> GetByIDList(IEnumerable<int> entityIDs)
+        public IList<T> GetByIdList(IEnumerable<int> entityIds)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
-            List<T> result = DB.Set<T>().Where(x => entityIDs.Contains(x.ID)).OrderBy(x => x.CreationTime).ToList();
+            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreationTime).ToList();
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -257,7 +257,7 @@ namespace BlasteR.Base
             }
 
             // Detached entity is not being tracked by the EntityFramework (new entity).
-            if (DB.Entry<T>(entity).State == EntityState.Detached && entity.ID == 0)
+            if (DB.Entry<T>(entity).State == EntityState.Detached && entity.Id == 0)
             {
                 PrivateInsert(entity, addToDbContext);
             }
@@ -270,7 +270,7 @@ namespace BlasteR.Base
                 }
                 catch (InvalidOperationException)
                 {
-                    T attachedEntity = DB.Set<T>().Single(x => x.ID == entity.ID);
+                    T attachedEntity = DB.Set<T>().Single(x => x.Id == entity.Id);
 
                     // Guard if CreationTime is not passed.
                     if (entity.CreationTime == DateTime.MinValue)
@@ -292,9 +292,9 @@ namespace BlasteR.Base
             foreach (PropertyInfo propertyInfo in propertyInfos)
             {
                 object value = propertyInfo.GetValue(entityFrom, null);
-                PropertyInfo piNavigationID = typeof(T).GetProperty(propertyInfo.Name + "ID");
-                int? valueID = (int?)piNavigationID.GetValue(entityFrom, null);
-                if (value != null || !valueID.HasValue || valueID == 0)
+                PropertyInfo piNavigationId = typeof(T).GetProperty(propertyInfo.Name + "Id");
+                int? valueId = (int?)piNavigationId.GetValue(entityFrom, null);
+                if (value != null || !valueId.HasValue || valueId == 0)
                 {
                     propertyInfo.SetValue(entityTo, value, null);
                 }
@@ -380,7 +380,7 @@ namespace BlasteR.Base
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
-            bool result = Delete(entity.ID, persist);
+            bool result = Delete(entity.Id, persist);
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -389,7 +389,7 @@ namespace BlasteR.Base
         /// <summary>
         /// Deletes entity of type T from the database.
         /// </summary>
-        /// <param name="id">ID of the entity to delete.</param>
+        /// <param name="id">Id of the entity to delete.</param>
         /// <returns>True if successfully deleted.</returns>
         public virtual bool Delete(int id, bool persist = false)
         {
@@ -398,7 +398,7 @@ namespace BlasteR.Base
             bool result = false;
             try
             {
-                T entity = DB.Set<T>().Single(x => x.ID == id);
+                T entity = DB.Set<T>().Single(x => x.Id == id);
                 if (entity != null)
                 {
                     DB.Set<T>().Remove(entity);
@@ -430,8 +430,8 @@ namespace BlasteR.Base
             int result = 0;
             try
             {
-                IEnumerable<int> idsToDelete = entities.Select(y => y.ID).ToList();
-                IEnumerable<T> entitiesToDelete = DB.Set<T>().Where(x => idsToDelete.Contains(x.ID));
+                IEnumerable<int> idsToDelete = entities.Select(y => y.Id).ToList();
+                IEnumerable<T> entitiesToDelete = DB.Set<T>().Where(x => idsToDelete.Contains(x.Id));
                 DB.Set<T>().RemoveRange(entitiesToDelete);
                 if (persist)
                     result = DB.SaveChanges();
@@ -479,11 +479,11 @@ namespace BlasteR.Base
         /// <summary>
         /// Gets or sets entity of type T.
         /// </summary>
-        /// <param name="ID">ID of the entity to get or set.</param>
+        /// <param name="id">Id of the entity to get or set.</param>
         /// <returns>Entity of type T.</returns>
-        public virtual T this[int ID] {
+        public virtual T this[int id] {
             get {
-                return GetByID(ID);
+                return GetById(id);
             }
             set {
                 Save(value);
