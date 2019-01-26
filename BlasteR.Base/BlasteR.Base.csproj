@@ -13,7 +13,7 @@
     <PackageTags>BLL, C#, .NET, Entity Framework</PackageTags>
     <Version>1.0.5</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageLicenseUrl>https://github.com/blaster7th/BlasteR.Base/wiki/Licence</PackageLicenseUrl>
+    <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
