@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.Serialization;
 
 namespace BlasteR.Base
 {
@@ -8,14 +7,14 @@ namespace BlasteR.Base
     {
         [Key]
         public int Id { get; set; }
-        public DateTime CreationTime { get; set; }
-        public DateTime? LastEditTime { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public DateTime? ModifiedTime { get; set; }
         
         public BaseEntity()
         {
             Id = 0;
-            CreationTime = DateTime.Now;
-            LastEditTime = null;
+            CreatedTime = DateTime.Now;
+            ModifiedTime = null;
         }
     }
 }

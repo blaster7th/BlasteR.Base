@@ -1,6 +1,6 @@
 ﻿/*
     This library is intended as a starting point for creating Business Logic Layer in database oriented applications.
-    Copyright (C) 2018 Srdjan Rudic
+    Copyright (C) 2019 Srdjan Rudic
     Email: blaster7th@gmail.com
 
     This library is free software: you can redistribute it and/or modify
@@ -19,13 +19,8 @@
 
 using System;
 using System.Collections.Generic;
-#if NETCOREAPP1_0 || NETCOREAPP1_1 || NETCOREAPP2_0 || NETSTANDARD2_0
 using Microsoft.EntityFrameworkCore;
-#else
-using System.Data.Entity;
-#endif
 using System.Linq;
-using System.Reflection;
 
 namespace BlasteR.Base
 {
@@ -103,7 +98,7 @@ namespace BlasteR.Base
             IList<T> result;
             try
             {
-                result = DB.Set<T>().OrderBy(x => x.CreationTime).ToList();
+                result = DB.Set<T>().OrderBy(x => x.CreatedTime).ToList();
             }
             catch (Exception ex)
             {
@@ -124,7 +119,7 @@ namespace BlasteR.Base
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
-            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreationTime).ToList();
+            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreatedTime).ToList();
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -141,7 +136,11 @@ namespace BlasteR.Base
 
             try
             {
-                PrivateInsert(entity, true);
+                entity.CreatedTime = DateTime.Now;
+                entity.ModifiedTime = null;
+
+                DB.Set<T>().Add(entity);
+
                 if (persist)
                     DB.SaveChanges();
             }
@@ -153,21 +152,6 @@ namespace BlasteR.Base
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return entity;
-        }
-
-        private void PrivateInsert(T entity, bool addToDbContext)
-        {
-            entity.CreationTime = DateTime.Now;
-            entity.LastEditTime = null;
-
-            foreach (var propertyInfo in entity.GetType().GetProperties().Where(x => x.PropertyType.IsSubclassOf(typeof(BaseEntity))))
-            {
-                if (propertyInfo.GetValue(entity, null) != null)
-                    PrivateSaveProperty(entity, propertyInfo);
-            }
-
-            if (addToDbContext)
-                DB.Set<T>().Add(entity);
         }
 
         /// <summary>
@@ -184,11 +168,11 @@ namespace BlasteR.Base
             {
                 foreach (T entity in entities)
                 {
-                    entity.CreationTime = DateTime.Now;
-                    entity.LastEditTime = null;
-
-                    PrivateInsert(entity, true);
+                    entity.CreatedTime = DateTime.Now;
+                    entity.ModifiedTime = null;
                 }
+
+                DB.Set<T>().AddRange(entities);
 
                 if (persist)
                     result = DB.SaveChanges();
@@ -229,9 +213,10 @@ namespace BlasteR.Base
 
             try
             {
-                IEnumerable<PropertyInfo> propertyInfos = typeof(T).GetProperties().Where(x => x.PropertyType.IsSubclassOf(typeof(BaseEntity)));
+                entity.ModifiedTime = DateTime.Now;
 
-                entity = PrivateSave(entity, propertyInfos, addToDbContext);
+                DB.Set<T>().Update(entity);
+
                 if (persist)
                     DB.SaveChanges();
             }
@@ -245,97 +230,6 @@ namespace BlasteR.Base
             return entity;
         }
 
-        private T PrivateSave(T entity, IEnumerable<PropertyInfo> propertyInfos, bool addToDbContext)
-        {
-            // Set last edit time to time of saving.
-            entity.LastEditTime = DateTime.Now;
-
-            foreach (var propertyInfo in propertyInfos)
-            {
-                if (propertyInfo.GetValue(entity, null) != null)
-                    PrivateSaveProperty(entity, propertyInfo);
-            }
-
-            // Detached entity is not being tracked by the EntityFramework (new entity).
-            if (DB.Entry<T>(entity).State == EntityState.Detached && entity.Id == 0)
-            {
-                PrivateInsert(entity, addToDbContext);
-            }
-            else
-            {
-                // Entity needs to be updated.
-                try
-                {
-                    DB.Entry(entity).State = EntityState.Modified;
-                }
-                catch (InvalidOperationException)
-                {
-                    T attachedEntity = DB.Set<T>().Single(x => x.Id == entity.Id);
-
-                    // Guard if CreationTime is not passed.
-                    if (entity.CreationTime == DateTime.MinValue)
-                        entity.CreationTime = attachedEntity.CreationTime;
-
-                    DB.Entry<T>(attachedEntity).CurrentValues.SetValues(entity);
-                    CopyBaseEntityProperties(entity, attachedEntity);
-
-                    entity = attachedEntity;
-                }
-            }
-
-            return entity;
-        }
-
-        private void CopyBaseEntityProperties(T entityFrom, T entityTo)
-        {
-            IEnumerable<PropertyInfo> propertyInfos = typeof(T).GetProperties().Where(x => x.PropertyType.IsSubclassOf(typeof(BaseEntity)));
-            foreach (PropertyInfo propertyInfo in propertyInfos)
-            {
-                object value = propertyInfo.GetValue(entityFrom, null);
-                PropertyInfo piNavigationId = typeof(T).GetProperty(propertyInfo.Name + "Id");
-                int? valueId = (int?)piNavigationId.GetValue(entityFrom, null);
-                if (value != null || !valueId.HasValue || valueId == 0)
-                {
-                    propertyInfo.SetValue(entityTo, value, null);
-                }
-            }
-        }
-
-        private void PrivateSaveProperty(T entity, PropertyInfo propertyInfo)
-        {
-            var baseBLLType = typeof(BaseBLL<,>);
-            var genericBLLType = baseBLLType.MakeGenericType(propertyInfo.PropertyType, typeof(U));
-
-            Type specificBLLType = BLLTypes.SingleOrDefault(x => x.IsSubclassOf(genericBLLType));
-
-            if (specificBLLType == null)
-            {
-                specificBLLType = BLLTypes.SingleOrDefault(x => x.Name == propertyInfo.PropertyType.Name + "BLL");
-            }
-
-            object materializedBLL = MaterializedBLLs.Where(x => x.GetType() == specificBLLType).SingleOrDefault();
-
-            if (materializedBLL == null)
-            {
-                materializedBLL = Activator.CreateInstance(genericBLLType, DB);
-            }
-
-            object propertyValueToSave = propertyInfo.GetValue(entity, null);
-
-            // If there is a value and this value is changed or not tracked, save it using it's BLL class.
-            if (propertyValueToSave != null && DB.Entry(propertyValueToSave).State != EntityState.Unchanged)
-            {
-                MethodInfo methodToInvoke;
-                if (specificBLLType != null)
-                    methodToInvoke = specificBLLType.GetMethod("Save", new Type[] { propertyInfo.PropertyType, typeof(bool), typeof(bool) });
-                else
-                    methodToInvoke = genericBLLType.GetMethod("Save", new Type[] { propertyInfo.PropertyType, typeof(bool), typeof(bool) });
-
-                object savedProperty = methodToInvoke.Invoke(materializedBLL, new object[] { propertyValueToSave, false, false });
-                propertyInfo.SetValue(entity, savedProperty, null);
-            }
-        }
-
         /// <summary>
         /// Inserts or updates range of entities.
         /// </summary>
@@ -345,16 +239,16 @@ namespace BlasteR.Base
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
-            int result = 0;
+            int result;
             try
             {
-                IEnumerable<PropertyInfo> propertyInfos = typeof(T).GetProperties().Where(x => x.PropertyType.IsSubclassOf(typeof(BaseEntity)));
-
-                // Since DB.SaveChanges() is called only once, this is not slow at all.
                 foreach (T entity in entities)
                 {
-                    PrivateSave(entity, propertyInfos, true);
+                    entity.CreatedTime = DateTime.Now;
+                    entity.ModifiedTime = null;
                 }
+
+                DB.Set<T>().UpdateRange(entities);
 
                 if (persist)
                     result = DB.SaveChanges();
@@ -487,63 +381,6 @@ namespace BlasteR.Base
             }
             set {
                 Save(value);
-            }
-        }
-
-        private static List<Type> bllTypes;
-        public static List<Type> BLLTypes {
-            get {
-                if (bllTypes == null)
-                {
-                    bllTypes = new List<Type>();
-                    var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes().Where(y => y.IsSubclassOf(typeof(BaseBLL)))).ToArray();
-                    foreach (var bllType in allTypes)
-                    {
-                        if (bllType.IsGenericType)
-                        {
-                            foreach (var entityType in EntityTypes)
-                            {
-                                var genericBLLType = bllType.MakeGenericType(entityType, typeof(U));
-                                bllTypes.Add(genericBLLType);
-                            }
-                        }
-                        else
-                        {
-                            bllTypes.Add(bllType);
-                        }
-                    }
-                }
-
-                return bllTypes;
-            }
-        }
-
-        private static Type[] entityTypes;
-        public static Type[] EntityTypes {
-            get {
-                if (entityTypes == null)
-                {
-                    entityTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes().Where(y => y.IsSubclassOf(typeof(BaseEntity)))).ToArray();
-                }
-
-                return entityTypes;
-            }
-        }
-
-        private List<object> materializedBLLs;
-        public List<object> MaterializedBLLs {
-            get {
-                if (materializedBLLs == null)
-                {
-                    materializedBLLs = new List<object>();
-
-                    foreach (var bllType in BLLTypes)
-                    {
-                        materializedBLLs.Add(Activator.CreateInstance(bllType, DB));
-                    }
-                }
-
-                return materializedBLLs;
             }
         }
     }
