@@ -68,7 +68,7 @@ namespace BlasteR.Base
         /// </summary>
         /// <param name="id">Id of the record.</param>
         /// <returns>Single or default value of type T.</returns>
-        public virtual T GetById(int id)
+        public virtual T Get(int id)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
@@ -82,6 +82,21 @@ namespace BlasteR.Base
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
                 throw ex;
             }
+
+            BaseLogger.LogMethodEnd(this, methodStart);
+            return result;
+        }
+
+        /// <summary>
+        /// Returns elements of type T which is contained in entityIds enumerable.
+        /// </summary>
+        /// <param name="entityIds">Enumerable of entityIds which should be returned.</param>
+        /// <returns>IList of requested entities.</returns>
+        public IList<T> Get(IEnumerable<int> entityIds)
+        {
+            DateTime methodStart = BaseLogger.LogMethodStart(this);
+
+            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreatedTime).ToList();
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -105,21 +120,6 @@ namespace BlasteR.Base
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
                 throw ex;
             }
-
-            BaseLogger.LogMethodEnd(this, methodStart);
-            return result;
-        }
-
-        /// <summary>
-        /// Returns elements of type T which is contained in entityIds enumerable.
-        /// </summary>
-        /// <param name="entityIds">Enumerable of entityIds which should be returned.</param>
-        /// <returns>IList of requested entities.</returns>
-        public IList<T> GetByIdList(IEnumerable<int> entityIds)
-        {
-            DateTime methodStart = BaseLogger.LogMethodStart(this);
-
-            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreatedTime).ToList();
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -268,21 +268,6 @@ namespace BlasteR.Base
         /// <summary>
         /// Deletes entity of type T from the database.
         /// </summary>
-        /// <param name="entity">Entity to delete.</param>
-        /// <returns>True if successfully deleted.</returns>
-        public virtual bool Delete(T entity, bool persist = false)
-        {
-            DateTime methodStart = BaseLogger.LogMethodStart(this);
-
-            bool result = Delete(entity.Id, persist);
-
-            BaseLogger.LogMethodEnd(this, methodStart);
-            return result;
-        }
-
-        /// <summary>
-        /// Deletes entity of type T from the database.
-        /// </summary>
         /// <param name="id">Id of the entity to delete.</param>
         /// <returns>True if successfully deleted.</returns>
         public virtual bool Delete(int id, bool persist = false)
@@ -313,30 +298,59 @@ namespace BlasteR.Base
         }
 
         /// <summary>
+        /// Deletes entity of type T from the database.
+        /// </summary>
+        /// <param name="entity">Entity to delete.</param>
+        /// <returns>True if successfully deleted.</returns>
+        public virtual bool Delete(T entity, bool persist = false)
+        {
+            DateTime methodStart = BaseLogger.LogMethodStart(this);
+
+            bool result = Delete(entity.Id, persist);
+
+            BaseLogger.LogMethodEnd(this, methodStart);
+            return result;
+        }
+
+        /// <summary>
         /// Deletes range of entities from the database.
         /// </summary>
-        /// <param name="entities">Range of entities to delete.</param>
+        /// <param name="entityIds">Enumerable of entityIds to delete.</param>
         /// <returns>Number of deleted entities.</returns>
-        public virtual int Delete(IEnumerable<T> entities, bool persist = false)
+        public virtual int Delete(IEnumerable<int> entityIds, bool persist = false)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
             int result = 0;
             try
             {
-                IEnumerable<int> idsToDelete = entities.Select(y => y.Id).ToList();
-                IEnumerable<T> entitiesToDelete = DB.Set<T>().Where(x => idsToDelete.Contains(x.Id));
+                IEnumerable<T> entitiesToDelete = DB.Set<T>().Where(x => entityIds.Contains(x.Id));
                 DB.Set<T>().RemoveRange(entitiesToDelete);
                 if (persist)
                     result = DB.SaveChanges();
                 else
-                    result = entities.Count();
+                    result = entityIds.Count();
             }
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
                 throw ex;
             }
+
+            BaseLogger.LogMethodEnd(this, methodStart);
+            return result;
+        }
+
+        /// <summary>
+        /// Deletes range of entities from the database.
+        /// </summary>
+        /// <param name="entities">Enumerable of entites to delete.</param>
+        /// <returns>Number of deleted entities.</returns>
+        public virtual int Delete(IEnumerable<T> entities, bool persist = false)
+        {
+            DateTime methodStart = BaseLogger.LogMethodStart(this);
+
+            int result = Delete(entities.Select(y => y.Id).ToList());
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -377,7 +391,7 @@ namespace BlasteR.Base
         /// <returns>Entity of type T.</returns>
         public virtual T this[int id] {
             get {
-                return GetById(id);
+                return Get(id);
             }
             set {
                 Save(value);
