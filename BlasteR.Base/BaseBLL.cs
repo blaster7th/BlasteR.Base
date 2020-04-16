@@ -137,7 +137,6 @@ namespace BlasteR.Base
             try
             {
                 entity.CreatedTime = DateTime.Now;
-                entity.ModifiedTime = null;
 
                 DB.Set<T>().Add(entity);
 
@@ -166,12 +165,6 @@ namespace BlasteR.Base
             int result;
             try
             {
-                foreach (T entity in entities)
-                {
-                    entity.CreatedTime = DateTime.Now;
-                    entity.ModifiedTime = null;
-                }
-
                 DB.Set<T>().AddRange(entities);
 
                 if (persist)
@@ -213,7 +206,10 @@ namespace BlasteR.Base
 
             try
             {
-                entity.ModifiedTime = DateTime.Now;
+                if (entity.Id != 0)
+                {
+                    entity.ModifiedTime = DateTime.Now;
+                }
 
                 DB.Set<T>().Update(entity);
 
@@ -244,8 +240,10 @@ namespace BlasteR.Base
             {
                 foreach (T entity in entities)
                 {
-                    entity.CreatedTime = DateTime.Now;
-                    entity.ModifiedTime = null;
+                    if (entity.Id != 0)
+                    {
+                        entity.ModifiedTime = DateTime.Now;
+                    }
                 }
 
                 DB.Set<T>().UpdateRange(entities);
@@ -389,11 +387,14 @@ namespace BlasteR.Base
         /// </summary>
         /// <param name="id">Id of the entity to get or set.</param>
         /// <returns>Entity of type T.</returns>
-        public virtual T this[int id] {
-            get {
+        public virtual T this[int id]
+        {
+            get
+            {
                 return Get(id);
             }
-            set {
+            set
+            {
                 Save(value);
             }
         }
