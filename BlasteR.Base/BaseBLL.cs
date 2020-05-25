@@ -68,7 +68,7 @@ namespace BlasteR.Base
         /// </summary>
         /// <param name="id">Id of the record.</param>
         /// <returns>Single or default value of type T.</returns>
-        public virtual T Get(int id)
+        public virtual T GetById(int id)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
@@ -90,9 +90,9 @@ namespace BlasteR.Base
         /// <summary>
         /// Returns elements of type T which is contained in entityIds enumerable.
         /// </summary>
-        /// <param name="entityIds">Enumerable of entityIds which should be returned.</param>
-        /// <returns>IList of requested entities.</returns>
-        public IList<T> Get(IEnumerable<int> entityIds)
+        /// <param name="entityIds">IEnumerable of entityIds which should be returned.</param>
+        /// <returns>IEnumerable of requested entities.</returns>
+        public IList<T> GetByIds(IEnumerable<int> entityIds)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
@@ -189,18 +189,6 @@ namespace BlasteR.Base
         /// <param name="persist">If true, entity will be persisted in DB, otherwise, it will only be saved to DBContext.</param>
         /// <returns>Newly saved entity.</returns>
         public virtual T Save(T entity, bool persist = false)
-        {
-            return Save(entity, true, persist);
-        }
-
-        /// <summary>
-        /// Inserts or updates entity of type T.
-        /// </summary>
-        /// <param name="entity">Entity of type T to insert or update.</param>
-        /// <param name="addToDbContext">True if entity should be added to DbContext.</param>
-        /// <param name="persist">If true, entity will be persisted in DB, otherwise, it will only be saved to DBContext.</param>
-        /// <returns>Newly saved entity.</returns>
-        public T Save(T entity, bool addToDbContext, bool persist = false)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
@@ -313,7 +301,7 @@ namespace BlasteR.Base
         /// <summary>
         /// Deletes range of entities from the database.
         /// </summary>
-        /// <param name="entityIds">Enumerable of entityIds to delete.</param>
+        /// <param name="entityIds">IEnumerable of entityIds to delete.</param>
         /// <returns>Number of deleted entities.</returns>
         public virtual int Delete(IEnumerable<int> entityIds, bool persist = false)
         {
@@ -342,7 +330,7 @@ namespace BlasteR.Base
         /// <summary>
         /// Deletes range of entities from the database.
         /// </summary>
-        /// <param name="entities">Enumerable of entites to delete.</param>
+        /// <param name="entities">IEnumerable of entites to delete.</param>
         /// <returns>Number of deleted entities.</returns>
         public virtual int Delete(IEnumerable<T> entities, bool persist = false)
         {
@@ -387,14 +375,11 @@ namespace BlasteR.Base
         /// </summary>
         /// <param name="id">Id of the entity to get or set.</param>
         /// <returns>Entity of type T.</returns>
-        public virtual T this[int id]
-        {
-            get
-            {
-                return Get(id);
+        public virtual T this[int id] {
+            get {
+                return GetById(id);
             }
-            set
-            {
+            set {
                 Save(value);
             }
         }
