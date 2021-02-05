@@ -28,8 +28,8 @@ namespace BlasteR.Base.Tests
 
             TestEntity deserialized = new TestEntity();
             deserialized.Id = testFromDb.Id;
-            deserialized.CreatedTime = testFromDb.CreatedTime;
-            deserialized.ModifiedTime = testFromDb.ModifiedTime;
+            deserialized.CreatedAt = testFromDb.CreatedAt;
+            deserialized.ModifiedAt = testFromDb.ModifiedAt;
             deserialized.IntProperty = testFromDb.IntProperty;
             deserialized.StringProperty = "Changed";
 

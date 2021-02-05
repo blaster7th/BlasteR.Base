@@ -59,7 +59,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
         }
 
@@ -80,7 +80,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -96,7 +96,7 @@ namespace BlasteR.Base
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
-            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreatedTime).ToList();
+            List<T> result = DB.Set<T>().Where(x => entityIds.Contains(x.Id)).OrderBy(x => x.CreatedAt).ToList();
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
@@ -113,12 +113,12 @@ namespace BlasteR.Base
             IList<T> result;
             try
             {
-                result = DB.Set<T>().OrderBy(x => x.CreatedTime).ToList();
+                result = DB.Set<T>().OrderBy(x => x.CreatedAt).ToList();
             }
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -136,7 +136,7 @@ namespace BlasteR.Base
 
             try
             {
-                entity.CreatedTime = DateTime.Now;
+                entity.CreatedAt = DateTime.Now;
 
                 DB.Set<T>().Add(entity);
 
@@ -146,7 +146,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -175,7 +175,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -196,7 +196,7 @@ namespace BlasteR.Base
             {
                 if (entity.Id != 0)
                 {
-                    entity.ModifiedTime = DateTime.Now;
+                    entity.ModifiedAt = DateTime.Now;
                 }
 
                 DB.Set<T>().Update(entity);
@@ -207,7 +207,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -230,7 +230,7 @@ namespace BlasteR.Base
                 {
                     if (entity.Id != 0)
                     {
-                        entity.ModifiedTime = DateTime.Now;
+                        entity.ModifiedAt = DateTime.Now;
                     }
                 }
 
@@ -244,7 +244,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -276,7 +276,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -320,7 +320,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);
@@ -363,7 +363,7 @@ namespace BlasteR.Base
             catch (Exception ex)
             {
                 BaseLogger.Log(LogLevel.Error, ex.Message, ex);
-                throw ex;
+                throw;
             }
 
             BaseLogger.LogMethodEnd(this, methodStart);

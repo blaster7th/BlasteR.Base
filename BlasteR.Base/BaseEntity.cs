@@ -7,14 +7,16 @@ namespace BlasteR.Base
     {
         [Key]
         public int Id { get; set; }
-        public DateTime CreatedTime { get; set; }
-        public DateTime? ModifiedTime { get; set; }
-        
+        public DateTime CreatedAt { get; set; }
+        public DateTime? ModifiedAt { get; set; }
+        public string CreatedBy { get; set; }
+        public string ModifiedBy { get; set; }
+
         public BaseEntity()
         {
             Id = 0;
-            CreatedTime = DateTime.Now;
-            ModifiedTime = null;
+            CreatedAt = DateTime.Now;
+            ModifiedAt = null;
         }
     }
 }
