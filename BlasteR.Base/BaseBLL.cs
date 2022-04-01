@@ -92,7 +92,7 @@ namespace BlasteR.Base
         /// </summary>
         /// <param name="entityIds">IEnumerable of entityIds which should be returned.</param>
         /// <returns>IEnumerable of requested entities.</returns>
-        public IList<T> GetByIds(IEnumerable<int> entityIds)
+        public virtual IList<T> GetByIds(IEnumerable<int> entityIds)
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
