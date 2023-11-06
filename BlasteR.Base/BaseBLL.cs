@@ -336,7 +336,7 @@ namespace BlasteR.Base
         {
             DateTime methodStart = BaseLogger.LogMethodStart(this);
 
-            int result = Delete(entities.Select(y => y.Id).ToList());
+            int result = Delete(entities.Select(y => y.Id).ToList(), persist);
 
             BaseLogger.LogMethodEnd(this, methodStart);
             return result;
