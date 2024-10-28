@@ -3,65 +3,83 @@ using Xunit;
 
 namespace BlasteR.Base.Tests
 {
-    public class UnitTests
+    public class UnitTests : IClassFixture<TestFixture>
     {
-        [Fact]
-        public void UpdateUsingEF()
+        public TestContext DB { get; set; }
+        public UnitTests(TestFixture fixture)
         {
-            using (var db = DbContextFactory.New())
+            DB = fixture.DB;
+        }
+
+        [Fact]
+        public void CRUD()
+        {
+            // Arrange
+            TestBLL testBLL = new TestBLL(DB);
+            var entity = new TestEntity()
             {
-                TestEntity testEntity = new TestEntity()
-                {
-                    IntProperty = 1,
-                    StringProperty = "Test"
-                };
+                IntProperty = 1,
+                StringProperty = "Test"
+            };
 
-                db.TestEntities.Update(testEntity);
-                db.SaveChanges();
-            }
+            // Act CREATE
+            testBLL.Save(entity, true);
 
-            TestEntity testFromDb = null;
-            using (var db = DbContextFactory.New())
-            {
-                testFromDb = db.TestEntities.Last();
-            }
+            // Assert
+            int entitiesCount = DB.TestEntities.Count();
+            Assert.NotEqual(0, entity.Id);
+            Assert.NotEqual(0, entitiesCount);
 
-            TestEntity deserialized = new TestEntity();
-            deserialized.Id = testFromDb.Id;
-            deserialized.CreatedAt = testFromDb.CreatedAt;
-            deserialized.ModifiedAt = testFromDb.ModifiedAt;
-            deserialized.IntProperty = testFromDb.IntProperty;
-            deserialized.StringProperty = "Changed";
+            // Act READ
+            entity = testBLL.GetById(entity.Id);
 
-            using (var db = DbContextFactory.New())
-            {
-                db.TestEntities.Update(deserialized);
+            // Assert
+            Assert.NotNull(entity);
 
-                db.SaveChanges();
-            }
+            // Act UPDATE
+            entity.StringProperty = "Test Updated";
+            testBLL.Save(entity, true);
+
+            // Assert
+            entity = testBLL.GetById(entity.Id);
+            Assert.Equal("Test Updated", entity.StringProperty);
+
+            // Act DELETE
+            testBLL.Delete(entity, true);
+
+            // Assert
+            Assert.True(DB.Entry(entity).State == Microsoft.EntityFrameworkCore.EntityState.Detached);
+            Assert.Equal(entitiesCount - 1, DB.TestEntities.Count());
         }
 
         [Fact]
         public void InsertGraph()
         {
-            using (var db = DbContextFactory.New())
+            // Arrange
+            TestBLL testBLL = new TestBLL(DB);
+            TestEntity testEntity = new TestEntity()
             {
-                TestBLL testBLL = new TestBLL(db);
-                TestEntity testEntity = new TestEntity()
+                IntProperty = 1,
+                StringProperty = "Test",
+                SecondEntity = new SecondEntity()
                 {
-                    IntProperty = 1,
-                    StringProperty = "Test",
-                    SecondEntity = new SecondEntity()
-                    {
-                        IntValue = 2,
-                        StringValue = "Second"
-                    }
-                };
+                    IntValue = 2,
+                    StringValue = "Second"
+                }
+            };
 
-                testBLL.Save(testEntity);
+            // Act
+            testBLL.Save(testEntity);
 
-                db.SaveChanges();
-            }
+            // Assert
+            Assert.True(DB.Entry(testEntity).State == Microsoft.EntityFrameworkCore.EntityState.Added);
+            Assert.True(DB.Entry(testEntity.SecondEntity).State == Microsoft.EntityFrameworkCore.EntityState.Added);
+
+            // Cleanup
+            DB.SecondEntities.Remove(testEntity.SecondEntity);
+            DB.TestEntities.Remove(testEntity);
+
+            DB.SaveChanges();
         }
     }
 }

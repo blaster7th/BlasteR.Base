@@ -24,25 +24,19 @@ using System.Linq;
 
 namespace BlasteR.Base
 {
-    public class BaseBLL
-    {
-
-    }
-
     /// <summary>
-    /// Generic class for accessing data through BLL layer. Should be used as base class for every other BLL class.
+    /// Generic class for accessing data through BLL layer. Should be used as a base class for every other BLL class.
     /// It has access to DbContext-derived class which acts as DAL.
     /// Every BLL class derived from BaseBLL can use DB (DAL) or BLL to get data.
     /// Note that using DAL enables EntityFramework to generate SQL queries (LINQ to SQL), while BLL does not (LINQ to objects).
     /// </summary>
     /// <typeparam name="T">Type used for accessing data.</typeparam>
     /// <typeparam name="U">DbContext derived type.</typeparam>
-    public class BaseBLL<T, U> : BaseBLL
-        where T : BaseEntity
+    public class BaseBLL<T, U> : IBaseBLL<T, U> where T : BaseEntity
         where U : DbContext
     {
         /// <summary>
-        /// Used as DAL.
+        /// Used as a Data Access Layer.
         /// </summary>
         public U DB { get; private set; }
 
@@ -375,11 +369,14 @@ namespace BlasteR.Base
         /// </summary>
         /// <param name="id">Id of the entity to get or set.</param>
         /// <returns>Entity of type T.</returns>
-        public virtual T this[int id] {
-            get {
+        public virtual T this[int id]
+        {
+            get
+            {
                 return GetById(id);
             }
-            set {
+            set
+            {
                 Save(value);
             }
         }

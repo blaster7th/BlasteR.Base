@@ -6,11 +6,11 @@ namespace BlasteR.Base.Tests
     {
         public static TestContext New()
         {
+            var connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=file::memory:?cache=shared");
+            // var connection = new Microsoft.Data.Sqlite.SqliteConnection("DataSource=:memory:");
+            connection.Open();
             var optionsBuilder = new DbContextOptionsBuilder<TestContext>();
-
-            string connectionString = "Server=(localdb)\\mssqllocaldb;Database=TestDB;Trusted_Connection=True;MultipleActiveResultSets=true";
-
-            optionsBuilder.UseSqlServer(connectionString);
+            optionsBuilder.UseSqlite(connection);
 
             return new TestContext(optionsBuilder.Options);
         }

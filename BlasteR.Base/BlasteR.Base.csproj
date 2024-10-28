@@ -1,27 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<TargetFramework>net6.0</TargetFramework>
+	<TargetFramework>netstandard2.0</TargetFramework>
     <Authors>Srdjan Rudic - BlasteR</Authors>
     <Copyright>Srdjan Rudic</Copyright>
-    <Description>Helper library for creating Business Logic Layer in database oriented applications.</Description>
+    <Description>Helper library for creating Business Logic Layer / Repository Classes in database oriented applications.</Description>
     <PackageProjectUrl>https://github.com/blaster7th/BlasteR.Base</PackageProjectUrl>
     <RepositoryUrl>https://github.com/blaster7th/BlasteR.Base</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageTags>BLL, C#, .NET, Entity Framework</PackageTags>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.3" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.32" />
   </ItemGroup>
 
   <ItemGroup>
-      <None Include="../README.md" Pack="true" PackagePath="\"/>
+      <None Include="../README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>
