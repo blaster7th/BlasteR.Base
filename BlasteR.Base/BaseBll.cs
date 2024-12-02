@@ -14,7 +14,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this library.  If not, see <https://www.gnu.org/licenses/>.
+    along with this library. If not, see <https://www.gnu.org/licenses/>.
 */
 
 using System;
@@ -25,14 +25,14 @@ using System.Linq;
 namespace BlasteR.Base
 {
     /// <summary>
-    /// Generic class for accessing data through BLL layer. Should be used as a base class for every other BLL class.
+    /// Generic class for accessing data through the Bll layer. Should be used as a base class for every other Bll class.
     /// It has access to DbContext-derived class which acts as DAL.
-    /// Every BLL class derived from BaseBLL can use DB (DAL) or BLL to get data.
-    /// Note that using DAL enables EntityFramework to generate SQL queries (LINQ to SQL), while BLL does not (LINQ to objects).
+    /// Every Bll class derived from BaseBll can use DB (DAL) or Bll to get data.
+    /// Note that using DAL enables EntityFramework to generate SQL queries (LINQ to SQL), while results from Bll do not (LINQ to objects).
     /// </summary>
     /// <typeparam name="T">Type used for accessing data.</typeparam>
     /// <typeparam name="U">DbContext derived type.</typeparam>
-    public class BaseBLL<T, U> : IBaseBLL<T, U> where T : BaseEntity
+    public class BaseBll<T, U> : IBaseBll<T, U> where T : BaseEntity
         where U : DbContext
     {
         /// <summary>
@@ -41,10 +41,10 @@ namespace BlasteR.Base
         public U DB { get; private set; }
 
         /// <summary>
-        /// Constructor creates instance of the BaseBLL class.
+        /// Constructor creates instance of the BaseBll class.
         /// </summary>
         /// <param name="db">DbContext to work with.</param>
-        public BaseBLL(U db)
+        public BaseBll(U db)
         {
             try
             {
@@ -379,6 +379,14 @@ namespace BlasteR.Base
             {
                 Save(value);
             }
+        }
+    }
+
+    public class BaseBLL<T, U> : BaseBll<T, U> where T : BaseEntity
+        where U : DbContext
+    {
+        public BaseBLL(U db) : base(db)
+        {
         }
     }
 }

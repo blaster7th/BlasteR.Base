@@ -15,7 +15,7 @@ namespace BlasteR.Base.Tests
         public void CRUD()
         {
             // Arrange
-            TestBLL testBLL = new TestBLL(DB);
+            TestBll testBll = new TestBll(DB);
             var entity = new TestEntity()
             {
                 IntProperty = 1,
@@ -23,7 +23,7 @@ namespace BlasteR.Base.Tests
             };
 
             // Act CREATE
-            testBLL.Save(entity, true);
+            testBll.Save(entity, true);
 
             // Assert
             int entitiesCount = DB.TestEntities.Count();
@@ -31,21 +31,21 @@ namespace BlasteR.Base.Tests
             Assert.NotEqual(0, entitiesCount);
 
             // Act READ
-            entity = testBLL.GetById(entity.Id);
+            entity = testBll.GetById(entity.Id);
 
             // Assert
             Assert.NotNull(entity);
 
             // Act UPDATE
             entity.StringProperty = "Test Updated";
-            testBLL.Save(entity, true);
+            testBll.Save(entity, true);
 
             // Assert
-            entity = testBLL.GetById(entity.Id);
+            entity = testBll.GetById(entity.Id);
             Assert.Equal("Test Updated", entity.StringProperty);
 
             // Act DELETE
-            testBLL.Delete(entity, true);
+            testBll.Delete(entity, true);
 
             // Assert
             Assert.True(DB.Entry(entity).State == Microsoft.EntityFrameworkCore.EntityState.Detached);
@@ -56,7 +56,7 @@ namespace BlasteR.Base.Tests
         public void InsertGraph()
         {
             // Arrange
-            TestBLL testBLL = new TestBLL(DB);
+            TestBll testBll = new TestBll(DB);
             TestEntity testEntity = new TestEntity()
             {
                 IntProperty = 1,
@@ -69,7 +69,7 @@ namespace BlasteR.Base.Tests
             };
 
             // Act
-            testBLL.Save(testEntity);
+            testBll.Save(testEntity);
 
             // Assert
             Assert.True(DB.Entry(testEntity).State == Microsoft.EntityFrameworkCore.EntityState.Added);

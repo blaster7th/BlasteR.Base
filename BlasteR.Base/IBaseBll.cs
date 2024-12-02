@@ -14,7 +14,7 @@
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this library.  If not, see <https://www.gnu.org/licenses/>.
+    along with this library. If not, see <https://www.gnu.org/licenses/>.
 */
 
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +22,7 @@ using System.Collections.Generic;
 
 namespace BlasteR.Base
 {
-    public interface IBaseBLL<T, U>
+    public interface IBaseBll<T, U>
         where T : BaseEntity
         where U : DbContext
     {

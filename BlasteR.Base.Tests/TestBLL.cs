@@ -1,8 +1,8 @@
 namespace BlasteR.Base.Tests
 {
-    public class TestBLL : BaseBLL<TestEntity, TestContext>
+    public class TestBll : BaseBll<TestEntity, TestContext>
     {
-        public TestBLL(TestContext db) : base(db)
+        public TestBll(TestContext db) : base(db)
         {
         }
     }
