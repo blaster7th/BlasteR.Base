@@ -42,5 +42,6 @@ namespace BlasteR.Base
         T Insert(T entity, bool persist = false);
         int Save(IEnumerable<T> entities, bool persist = false);
         T Save(T entity, bool persist = false);
+        int SaveChanges();
     }
 }

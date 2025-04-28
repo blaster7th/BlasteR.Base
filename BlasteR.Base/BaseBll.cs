@@ -364,6 +364,11 @@ namespace BlasteR.Base
             return result;
         }
 
+        public int SaveChanges()
+        {
+            return DB.SaveChanges();
+        }
+
         /// <summary>
         /// Gets or sets entity of type T.
         /// </summary>
