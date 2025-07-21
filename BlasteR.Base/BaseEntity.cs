@@ -19,4 +19,11 @@ namespace BlasteR.Base
             ModifiedAt = null;
         }
     }
+    
+    public class SoftDeletableEntity : BaseEntity
+    {
+        public bool IsDeleted { get; set; }
+        public string DeletedBy { get; set; }
+        public DateTime? DeletedAt { get; set; }
+    }
 }

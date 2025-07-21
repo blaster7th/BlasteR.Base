@@ -5,62 +5,62 @@ namespace BlasteR.Base.Tests
 {
     public class UnitTests : IClassFixture<TestFixture>
     {
-        public TestContext DB { get; set; }
+        public IUnitOfWork UnitOfWork { get; set; }
         public UnitTests(TestFixture fixture)
         {
-            DB = fixture.DB;
+            UnitOfWork = fixture.UnitOfWork;
         }
 
         [Fact]
         public void CRUD()
         {
             // Arrange
-            TestBll testBll = new TestBll(DB);
-            var entity = new TestEntity()
+            FirstBll firstBll = new FirstBll(UnitOfWork);
+            var entity = new FirstEntity()
             {
-                IntProperty = 1,
-                StringProperty = "Test"
+                IntValue = 1,
+                StringValue = "Test"
             };
 
             // Act CREATE
-            testBll.Save(entity, true);
+            firstBll.Save(entity);
 
             // Assert
-            int entitiesCount = DB.TestEntities.Count();
+            int entitiesCount = firstBll.GetAll().Count();
             Assert.NotEqual(0, entity.Id);
             Assert.NotEqual(0, entitiesCount);
 
             // Act READ
-            entity = testBll.GetById(entity.Id);
+            entity = firstBll.GetById(entity.Id);
 
             // Assert
             Assert.NotNull(entity);
 
             // Act UPDATE
-            entity.StringProperty = "Test Updated";
-            testBll.Save(entity, true);
+            entity.StringValue = "Test Updated";
+            firstBll.Save(entity);
 
             // Assert
-            entity = testBll.GetById(entity.Id);
-            Assert.Equal("Test Updated", entity.StringProperty);
+            entity = firstBll.GetById(entity.Id);
+            Assert.Equal("Test Updated", entity.StringValue);
 
             // Act DELETE
-            testBll.Delete(entity, true);
+            firstBll.Delete(entity);
 
             // Assert
-            Assert.True(DB.Entry(entity).State == Microsoft.EntityFrameworkCore.EntityState.Detached);
-            Assert.Equal(entitiesCount - 1, DB.TestEntities.Count());
+            Assert.Equal(entitiesCount - 1, firstBll.GetAll().Count());
         }
 
         [Fact]
-        public void InsertGraph()
+        public void InsertParentChild()
         {
             // Arrange
-            TestBll testBll = new TestBll(DB);
-            TestEntity testEntity = new TestEntity()
+            FirstBll firstBll = new FirstBll(UnitOfWork);
+            SecondBll secondBll = new SecondBll(UnitOfWork);
+            FirstEntity firstEntity = new FirstEntity()
             {
-                IntProperty = 1,
-                StringProperty = "Test",
+                IntValue = 1,
+                StringValue = "Test",
                 SecondEntity = new SecondEntity()
                 {
                     IntValue = 2,
@@ -69,17 +69,73 @@ namespace BlasteR.Base.Tests
             };
 
             // Act
-            testBll.Save(testEntity);
+            firstBll.Save(firstEntity);
 
             // Assert
-            Assert.True(DB.Entry(testEntity).State == Microsoft.EntityFrameworkCore.EntityState.Added);
-            Assert.True(DB.Entry(testEntity.SecondEntity).State == Microsoft.EntityFrameworkCore.EntityState.Added);
+            Assert.NotEqual(0, firstEntity.Id);
+            Assert.NotEqual(0, firstEntity.SecondEntity.Id);
+            Assert.Equal(firstEntity.Id, firstEntity.SecondEntity.FirstEntityId);
 
             // Cleanup
-            DB.SecondEntities.Remove(testEntity.SecondEntity);
-            DB.TestEntities.Remove(testEntity);
+            secondBll.Delete(firstEntity.SecondEntity);
+            firstBll.Delete(firstEntity);
+        }
 
-            DB.SaveChanges();
+        [Fact]
+        public void InsertParentChildReverse()
+        {
+            // Arrange
+            FirstBll firstBll = new FirstBll(UnitOfWork);
+            SecondBll secondBll = new SecondBll(UnitOfWork);
+            SecondEntity secondEntity = new SecondEntity()
+            {
+                IntValue = 2,
+                StringValue = "Second",
+                FirstEntity = new FirstEntity()
+                {
+                    IntValue = 1,
+                    StringValue = "Test"
+                }
+            };
+
+            // Act
+            secondBll.Save(secondEntity);
+
+            // Assert
+            Assert.NotEqual(0, secondEntity.Id);
+            Assert.NotEqual(0, secondEntity.FirstEntity.Id);
+            Assert.Equal(secondEntity.FirstEntity.Id, secondEntity.FirstEntityId);
+
+            // Cleanup
+            secondBll.Delete(secondEntity);
+            firstBll.Delete(secondEntity.FirstEntity);
+        }
+
+        [Fact]
+        public void SoftDelete()
+        {
+            // Arrange
+            SoftDeletableTestBLL softDeletableTestBLL = new SoftDeletableTestBLL(UnitOfWork);
+            SoftDeletableTestEntity softDeletableTestEntity = new SoftDeletableTestEntity()
+            {
+                IntValue = 1,
+                StringValue = "Test",
+            };
+
+            softDeletableTestBLL.Save(softDeletableTestEntity);
+
+            // Act Soft Delete
+            softDeletableTestBLL.Delete(softDeletableTestEntity);
+
+            // Assert
+            Assert.DoesNotContain(softDeletableTestEntity.Id, softDeletableTestBLL.GetAll(false).Select(x => x.Id));
+            Assert.Contains(softDeletableTestEntity.Id, softDeletableTestBLL.GetAll(true).Select(x => x.Id));
+
+            // Act Hard Delete
+            softDeletableTestBLL.Delete(softDeletableTestEntity, true);
+
+            // Assert
+            Assert.DoesNotContain(softDeletableTestEntity.Id, softDeletableTestBLL.GetAll(true).Select(x => x.Id));
         }
     }
 }

@@ -6,7 +6,7 @@ namespace BlasteR.Base.Tests
 {
     public class TestFixture : IDisposable
     {
-        public TestContext DB { get; set; }
+        public IUnitOfWork UnitOfWork { get; set; }
 
         private static object lockObject = new object();
 
@@ -14,13 +14,14 @@ namespace BlasteR.Base.Tests
         {
             lock (lockObject)
             {
-                DB = DbContextFactory.New();
+                UnitOfWork = DbConnectionFactory.GetInMemoryUnitOfWork("TestUser");
+                TestDatabase.Initialize(UnitOfWork.DB);
             }
         }
 
         public void Dispose()
         {
-            DB.Dispose();
+            UnitOfWork.Dispose();
         }
     }
 }

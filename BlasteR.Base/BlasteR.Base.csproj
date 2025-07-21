@@ -10,15 +10,16 @@
     <RepositoryType>git</RepositoryType>
     <PackageReleaseNotes />
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageTags>Business Logic Layer, Bll, Repository, C#, .NET, Entity Framework</PackageTags>
-    <Version>1.2.5</Version>
+    <PackageTags>Business Logic Layer, Bll, Repository, Service, C#, .NET, Dapper</PackageTags>
+    <Version>2.0.0-alpha</Version>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>LGPL-3.0-or-later</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.14" />
+    <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
