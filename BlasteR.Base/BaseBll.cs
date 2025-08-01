@@ -307,6 +307,8 @@ namespace BlasteR.Base
                             p.CanWrite)
                 .ToList();
 
+            var propertiesWOModified = properties.Where(x => x.Name != "ModifiedAt" && x.Name != "ModifiedBy").ToList();
+
             // If child entities already have Ids, update reference Ids in the parent.
             foreach (var property in type.GetProperties())
             {
@@ -359,7 +361,8 @@ namespace BlasteR.Base
             {
                 entity.ModifiedAt = DateTime.Now;
                 entity.ModifiedBy = User;
-                var updateQuery = $"UPDATE {TableName} SET {string.Join(",", properties.Select(p => $"`{p.Name}`=@{p.Name}"))} WHERE Id=@Id";
+                var updateQuery = $"UPDATE {TableName} SET {string.Join(",", properties.Select(p => $"`{p.Name}`=@{p.Name}"))} WHERE Id=@Id " +
+                                    $"AND ({string.Join(" OR ", propertiesWOModified.Select(p => $"((`{p.Name}`!=@{p.Name}) OR (`{p.Name}` IS NULL AND @{p.Name} IS NOT NULL) OR (`{p.Name}` IS NOT NULL AND @{p.Name} IS NULL))"))})";
                 DB.Execute(updateQuery, param: entity, transaction: Transaction);
             }
 
